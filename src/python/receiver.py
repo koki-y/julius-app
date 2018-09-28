@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import xml.etree.ElementTree as ET
 import julius_conf as conf
@@ -52,6 +53,10 @@ def remove_gabage(data):
 			data = data.replace(gabage, '')
 	return data
 	
+def checkPython3():
+	if sys.version_info[0] < 3:
+		raise Exception('Must be using Python3.')
 
 if __name__ == "__main__":
+	checkPython3()
 	main()
