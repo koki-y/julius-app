@@ -2,16 +2,17 @@ import os
 import sys
 import threading
 import xml.etree.ElementTree as ET
+
 import julius_conf as conf
 import julius_utils as utils
 
 def main():
 	client = utils.makeConnection()
 
-	receive_and_print = threading.Thread(target=receiving_julius_msg_and_print, args=[client])
+	wait_and_send_command = threading.Thread(target=wait_stdin_and_send_command, args=[client])
 	try:
-		receive_and_print.start()
-		wait_stdin_and_send_command(client)
+		# wait_and_send_command.start()
+		receiving_julius_msg_and_print(client)
 	except KeyboardInterrupt:
 		client.close()
 
@@ -35,10 +36,26 @@ def receiving_julius_msg_and_print(client):
 def onReceiveMessage(datas):
 	for data in datas:
 		xmldata = perse_xml(remove_gabage(data))
-		print_xml(xmldata)
+		print_xml_for_demo(xmldata) # for demo
+		# print_xml(xmldata)
 
 def perse_xml(data):
 	return ET.fromstring(data)
+
+def print_xml_for_demo(xml_data):
+	if xml_data.tag == 'INPUT':
+		if xml_data.attrib['STATUS'] == 'LISTEN':
+			print('<<< please speak >>>')
+		if xml_data.attrib['STATUS'] == 'STARTREC':
+			print('Recoginition...' + os.linesep)
+	if xml_data.tag == 'REJECTED':
+		print('Recected :' + xml_data.attrib['REASON'] + os.linesep)
+	if xml_data.tag == 'RECOGOUT':
+		result = ''
+		for child in xml_data:
+			for mago in child:
+				result += mago.attrib['WORD']
+		print('Sentence: ' + result + os.linesep)
 
 def print_xml(xml_data):
 	print('> ', xml_data.tag, xml_data.attrib)
