@@ -54,7 +54,9 @@ def print_xml_for_demo(xml_data):
 		result = ''
 		for child in xml_data:
 			for mago in child:
-				result += mago.attrib['WORD']
+				if (mago.attrib['PHONE'] != 'silB'
+				    and mago.attrib['PHONE'] != 'silE'):
+					result += mago.attrib['WORD']
 		print('Sentence: ' + result + os.linesep)
 
 def print_xml(xml_data):
