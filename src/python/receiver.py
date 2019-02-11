@@ -36,8 +36,9 @@ def receiving_julius_msg_and_print(client):
 def onReceiveMessage(datas):
 	for data in datas:
 		xmldata = perse_xml(remove_gabage(data))
-		print_xml_for_demo(xmldata) # for demo
+		# print_xml_for_demo(xmldata)
 		# print_xml(xmldata)
+		print_xml_with_cm(xmldata)
 
 def perse_xml(data):
 	return ET.fromstring(data)
@@ -47,9 +48,9 @@ def print_xml_for_demo(xml_data):
 		if xml_data.attrib['STATUS'] == 'LISTEN':
 			print('<<< please speak >>>')
 		if xml_data.attrib['STATUS'] == 'STARTREC':
-			print('Recoginition...' + os.linesep)
+			print('Recoginition...')
 	if xml_data.tag == 'REJECTED':
-		print('Recected :' + xml_data.attrib['REASON'] + os.linesep)
+		print('Rejected :' + xml_data.attrib['REASON'] + os.linesep)
 	if xml_data.tag == 'RECOGOUT':
 		result = ''
 		for child in xml_data:
@@ -65,6 +66,26 @@ def print_xml(xml_data):
 		print('>   ', child.tag, child.attrib)
 		for mago in child:
 			print('>     ', mago.tag, mago.attrib)
+
+def print_xml_with_cm(xml_data):
+	if xml_data.tag == 'INPUT':
+		if xml_data.attrib['STATUS'] == 'LISTEN':
+			print('<<< please speak >>>')
+		if xml_data.attrib['STATUS'] == 'STARTREC':
+			print('  Recoginition...')
+	if xml_data.tag == 'REJECTED':
+		print('Rejected : ' + xml_data.attrib['REASON'] + os.linesep)
+	if xml_data.tag == 'RECOGOUT':
+		result = ''
+		for child in xml_data:
+			for mago in child:
+				if (mago.attrib['CM'] != '1.0'):
+					print('  Rejected : The recognized word is not correct.')
+					return
+				if (mago.attrib['PHONE'] != 'silB'
+				    and mago.attrib['PHONE'] != 'silE'):
+					result += mago.attrib['WORD']
+		print('  Sentence: ' + result + os.linesep)
 
 def remove_gabage(data):
 	for gabage in conf.gabages:
